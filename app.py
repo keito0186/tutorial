@@ -5,7 +5,8 @@ import time
 st.set_page_config(page_title="Pomodoro Timer", page_icon="⏱️", layout="centered")
 
 # カスタムCSS
-st.markdown("""
+st.markdown(
+    """
     <style>
     /* 全体の背景とフォント */
     .stApp {
@@ -57,60 +58,86 @@ st.markdown("""
         color: white;
     }
     </style>
-    """, unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True,
+)
+
+# --- サイドバー設定 ---
+with st.sidebar:
+    st.markdown("### ⚙️ Settings")
+    focus_duration = st.number_input(
+        "Focus Duration (min)", min_value=1, max_value=120, value=25
+    )
+    break_duration = st.number_input(
+        "Break Duration (min)", min_value=1, max_value=60, value=5
+    )
 
 # セッション状態の初期化
-if 'time_left' not in st.session_state:
-    st.session_state.time_left = 25 * 60
-if 'is_running' not in st.session_state:
+if "time_left" not in st.session_state:
+    st.session_state.time_left = focus_duration * 60
+if "is_running" not in st.session_state:
     st.session_state.is_running = False
-if 'mode' not in st.session_state:
+if "mode" not in st.session_state:
     st.session_state.mode = "Focus"  # Focus or Break
+
 
 # ヘルパー関数
 def start_timer():
     st.session_state.is_running = True
 
+
 def stop_timer():
     st.session_state.is_running = False
+
 
 def reset_timer():
     st.session_state.is_running = False
     if st.session_state.mode == "Focus":
-        st.session_state.time_left = 25 * 60
+        st.session_state.time_left = focus_duration * 60
     else:
-        st.session_state.time_left = 5 * 60
+        st.session_state.time_left = break_duration * 60
+
 
 def set_mode(mode):
     st.session_state.mode = mode
     st.session_state.is_running = False
     if mode == "Focus":
-        st.session_state.time_left = 25 * 60
+        st.session_state.time_left = focus_duration * 60
     else:
-        st.session_state.time_left = 5 * 60
+        st.session_state.time_left = break_duration * 60
+
 
 # --- UI構築 ---
 
-st.markdown("<h1 style='text-align: center; margin-bottom: 30px;'>Pomodoro Timer</h1>", unsafe_allow_html=True)
+st.markdown(
+    "<h1 style='text-align: center; margin-bottom: 30px;'>Pomodoro Timer</h1>",
+    unsafe_allow_html=True,
+)
 
 # メインのタイマー表示エリア
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     # モードに応じた色設定
     if st.session_state.mode == "Focus":
-        mode_color = "#FF6B6B" # 落ち着いた赤
+        mode_color = "#FF6B6B"  # 落ち着いた赤
         timer_color = "#FF6B6B"
     else:
-        mode_color = "#4ECDC4" # 落ち着いたティール
+        mode_color = "#4ECDC4"  # 落ち着いたティール
         timer_color = "#4ECDC4"
 
-    st.markdown(f"<div class='status-label' style='color: {mode_color};'>{st.session_state.mode}</div>", unsafe_allow_html=True)
+    st.markdown(
+        f"<div class='status-label' style='color: {mode_color};'>{st.session_state.mode}</div>",
+        unsafe_allow_html=True,
+    )
 
     mins, secs = divmod(st.session_state.time_left, 60)
     timer_str = f"{mins:02d}:{secs:02d}"
-    st.markdown(f"<div class='timer-display' style='color: {timer_color};'>{timer_str}</div>", unsafe_allow_html=True)
+    st.markdown(
+        f"<div class='timer-display' style='color: {timer_color};'>{timer_str}</div>",
+        unsafe_allow_html=True,
+    )
 
-st.write("") # スペーサー
+st.write("")  # スペーサー
 
 # コントロールボタン
 c1, c2, c3 = st.columns(3)
@@ -124,12 +151,19 @@ with c3:
 st.markdown("---")
 
 # プリセット切り替え
-st.markdown("<h4 style='text-align: center; color: #888;'>Select Mode</h4>", unsafe_allow_html=True)
+st.markdown(
+    "<h4 style='text-align: center; color: #888;'>Select Mode</h4>",
+    unsafe_allow_html=True,
+)
 c_focus, c_break = st.columns(2)
 with c_focus:
-    st.button("🍅 Focus (25 min)", on_click=lambda: set_mode("Focus"), use_container_width=True)
+    st.button(
+        f"🍅 Focus Mode", on_click=lambda: set_mode("Focus"), use_container_width=True
+    )
 with c_break:
-    st.button("☕ Break (5 min)", on_click=lambda: set_mode("Break"), use_container_width=True)
+    st.button(
+        f"☕ Break Mode", on_click=lambda: set_mode("Break"), use_container_width=True
+    )
 
 # タイマーロジック (自動更新)
 if st.session_state.is_running:
